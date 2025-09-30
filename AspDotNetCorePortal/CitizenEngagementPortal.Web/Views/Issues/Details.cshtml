@@ -1,0 +1,215 @@
+@model CitizenEngagementPortal.Web.Models.ViewModel.Issues.IssueDetailViewModel
+@{
+    ViewData["Title"] = "Issue Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Issue Details</h2>
+    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h3 class="card-title">@Model.Title</h3>
+                        <p class="card-text text-muted mb-0">@Model.Description</p>
+                        <small class="text-muted">
+                            Reported by @Model.Citizen.Name (@Model.Citizen.Email) on @Model.CreatedAt.ToString("MMM dd, yyyy at HH:mm")
+                        </small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <span class="badge" style="background-color: @Model.Category.Color">
+                            @Model.Category.Name
+                        </span>
+                        <span class="badge bg-@(Model.Status switch
+                        {
+                            IssueStatus.Pending => "warning",
+                            IssueStatus.InProgress => "info",
+                            IssueStatus.Resolved => "success",
+                            IssueStatus.Rejected => "danger",
+                            _ => "secondary"
+                        })">
+                            @Model.Status
+                        </span>
+                        <span class="badge bg-@(Model.Priority switch
+                        {
+                            Priority.Low => "secondary",
+                            Priority.Medium => "warning",
+                            Priority.High => "danger",
+                            Priority.Urgent => "danger",
+                            _ => "secondary"
+                        })">
+                            @Model.Priority
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6>Location Information</h6>
+                        <p><i class="fas fa-map-marker-alt me-2"></i>@Model.Location</p>
+                        @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                        {
+                            <p><i class="fas fa-globe me-2"></i>Coordinates: @Model.Latitude.Value.ToString("F4"), @Model.Longitude.Value.ToString("F4")</p>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Timeline</h6>
+                        <p><i class="fas fa-calendar-plus me-2"></i>Created: @Model.CreatedAt.ToString("MMM dd, yyyy")</p>
+                        @if (Model.AssignedAt.HasValue)
+                        {
+                            <p><i class="fas fa-user-check me-2"></i>Assigned: @Model.AssignedAt.Value.ToString("MMM dd, yyyy")</p>
+                        }
+                        @if (Model.ResolvedAt.HasValue)
+                        {
+                            <p><i class="fas fa-check-circle me-2"></i>Resolved: @Model.ResolvedAt.Value.ToString("MMM dd, yyyy")</p>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.Assignee != null)
+                {
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6>Assigned To</h6>
+                            <p><i class="fas fa-user me-2"></i>@Model.Assignee.Name (@Model.Assignee.Email)</p>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.Media.Any())
+                {
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6>Attached Media</h6>
+                            <div class="row">
+                                @foreach (var media in Model.Media)
+                                {
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card">
+                                            @if (media.Type == MediaType.Image)
+                                            {
+                                                <img src="@media.Url" class="card-img-top" alt="Issue media" style="height: 150px; object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 150px; background-color: #f8f9fa;">
+                                                    <i class="fas fa-video fa-3x text-muted"></i>
+                                                </div>
+                                            }
+                                            <div class="card-body text-center p-2">
+                                                <small class="text-muted">@media.Type</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Admin Actions -->
+                @if (Model.CanAssign || Model.CanResolve)
+                {
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6>Actions</h6>
+                            <div class="d-flex gap-2">
+                                @if (Model.CanAssign && Model.Status == IssueStatus.Pending)
+                                {
+                                    <a asp-controller="Admin" asp-action="AssignIssue" asp-route-id="@Model.Id" class="btn btn-primary">
+                                        <i class="fas fa-user-plus me-2"></i>Assign Issue
+                                    </a>
+                                }
+                                @if (Model.CanResolve && Model.Status != IssueStatus.Resolved)
+                                {
+                                    <form asp-controller="Admin" asp-action="UpdateIssueStatus" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@Model.Id" />
+                                        <input type="hidden" name="status" value="@IssueStatus.Resolved" />
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-check me-2"></i>Mark Resolved
+                                        </button>
+                                    </form>
+                                }
+                                @if (Model.CanResolve && Model.Status == IssueStatus.Resolved)
+                                {
+                                    <form asp-controller="Admin" asp-action="UpdateIssueStatus" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@Model.Id" />
+                                        <input type="hidden" name="status" value="@IssueStatus.InProgress" />
+                                        <button type="submit" class="btn btn-warning">
+                                            <i class="fas fa-undo me-2"></i>Reopen Issue
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Comments Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Comments (@Model.Comments.Count)</h5>
+            </div>
+            <div class="card-body">
+                <!-- Add Comment Form -->
+                <form asp-controller="Issues" asp-action="AddComment" method="post" class="mb-4">
+                    <input type="hidden" name="issueId" value="@Model.Id" />
+                    <div class="mb-3">
+                        <label class="form-label">Add a Comment</label>
+                        <textarea name="content" class="form-control" rows="3" placeholder="Share your thoughts or updates about this issue..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Post Comment
+                    </button>
+                </form>
+
+                <hr>
+
+                <!-- Comments List -->
+                @if (Model.Comments.Any())
+                {
+                    <div class="comments-list">
+                        @foreach (var comment in Model.Comments)
+                        {
+                            <div class="comment mb-3">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            @(comment.Author.Name?.FirstOrDefault() ?? comment.Author.Email.FirstOrDefault())
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="mb-1">@comment.Author.Name</h6>
+                                            <small class="text-muted">@comment.CreatedAt.ToString("MMM dd, yyyy HH:mm")</small>
+                                        </div>
+                                        <p class="mb-0">@comment.Content</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-3">
+                        <p class="text-muted mb-0">No comments yet. Be the first to comment!</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

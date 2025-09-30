@@ -1,0 +1,208 @@
+@model CitizenEngagementPortal.Web.Models.ViewModel.Admin.AnalyticsViewModel
+@{
+    ViewData["Title"] = "Analytics Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Analytics Dashboard</h2>
+    <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-primary">@Model.ResolutionTime.Average.ToString("F1")</h3>
+                <h6 class="card-title">Avg. Resolution Time (days)</h6>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-success">@Model.ResolutionTime.Fastest.ToString("F1")</h3>
+                <h6 class="card-title">Fastest Resolution (days)</h6>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-danger">@Model.ResolutionTime.Slowest.ToString("F1")</h3>
+                <h6 class="card-title">Slowest Resolution (days)</h6>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-info">@Model.IssuesByCategory.Count</h3>
+                <h6 class="card-title">Total Categories</h6>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Issues by Category</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.IssuesByCategory.Any())
+                {
+                    <canvas id="categoryChart" width="400" height="300"></canvas>
+                }
+                else
+                {
+                    <p class="text-muted text-center">No data available</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Issues by Status</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.IssuesByStatus.Any())
+                {
+                    <canvas id="statusChart" width="400" height="300"></canvas>
+                }
+                else
+                {
+                    <p class="text-muted text-center">No data available</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Monthly Issue Trends</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.IssuesByMonth.Any())
+                {
+                    <canvas id="monthlyChart" width="400" height="300"></canvas>
+                }
+                else
+                {
+                    <p class="text-muted text-center">No data available</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Top Problem Categories</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.TopCategories.Any())
+                {
+                    @foreach (var category in Model.TopCategories)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle me-3" style="width: 20px; height: 20px; background-color: @Model.IssuesByCategory.FirstOrDefault(c => c.Name == category.Name)?.Color ?? "#6B7280";"></div>
+                                <span>@category.Name</span>
+                            </div>
+                            <div>
+                                <span class="badge bg-secondary me-2">@category.Count</span>
+                                <small class="text-muted">(@category.Percentage.ToString("F1")%)</small>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted text-center">No data available</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Issues by Category Chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(categoryCtx, {
+            type: 'bar',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.IssuesByCategory.Select(c => $"'{c.Name}'")))],
+                datasets: [{
+                    label: 'Number of Issues',
+                    data: [@string.Join(",", Model.IssuesByCategory.Select(c => c.Count))],
+                    backgroundColor: [@Html.Raw(string.Join(",", Model.IssuesByCategory.Select(c => $"'{c.Color}'")))],
+                    borderColor: [@Html.Raw(string.Join(",", Model.IssuesByCategory.Select(c => $"'{c.Color}'")))],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Issues by Status Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.IssuesByStatus.Select(s => $"'{s.Name}'")))],
+                datasets: [{
+                    data: [@string.Join(",", Model.IssuesByStatus.Select(s => s.Count))],
+                    backgroundColor: [@Html.Raw(string.Join(",", Model.IssuesByStatus.Select(s => $"'{s.Color}'")))],
+                    borderColor: [@Html.Raw(string.Join(",", Model.IssuesByStatus.Select(s => $"'{s.Color}'")))],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Monthly Trends Chart
+        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+        new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.IssuesByMonth.Select(m => $"'{m.Month}'")))],
+                datasets: [{
+                    label: 'Issues Reported',
+                    data: [@string.Join(",", Model.IssuesByMonth.Select(m => m.Count))],
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+}

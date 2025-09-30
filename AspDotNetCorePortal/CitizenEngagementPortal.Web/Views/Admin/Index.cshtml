@@ -1,0 +1,193 @@
+@model CitizenEngagementPortal.Web.Models.ViewModel.Admin.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Admin Dashboard</h2>
+    <div>
+        <span class="badge bg-danger me-2">Administrator</span>
+        <a asp-controller="Admin" asp-action="Analytics" class="btn btn-outline-primary">
+            <i class="fas fa-chart-bar me-2"></i>Analytics
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-2">
+        <div class="card text-white bg-primary">
+            <div class="card-body text-center">
+                <h3>@Model.TotalIssues</h3>
+                <h6 class="card-title">Total Issues</h6>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-white bg-warning">
+            <div class="card-body text-center">
+                <h3>@Model.PendingIssues</h3>
+                <h6 class="card-title">Pending</h6>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-white bg-info">
+            <div class="card-body text-center">
+                <h3>@Model.InProgressIssues</h3>
+                <h6 class="card-title">In Progress</h6>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-white bg-success">
+            <div class="card-body text-center">
+                <h3>@Model.ResolvedIssues</h3>
+                <h6 class="card-title">Resolved</h6>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-white bg-secondary">
+            <div class="card-body text-center">
+                <h3>@Model.TotalUsers</h3>
+                <h6 class="card-title">Total Users</h6>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-white bg-dark">
+            <div class="card-body text-center">
+                <h3>@Model.TotalCitizens</h3>
+                <h6 class="card-title">Citizens</h6>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Issues by Category</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.CategoryStats.Any())
+                {
+                    foreach (var category in Model.CategoryStats)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle me-2" style="width: 12px; height: 12px; background-color: @category.CategoryColor;"></div>
+                                <span>@category.CategoryName</span>
+                            </div>
+                            <div>
+                                <span class="badge bg-secondary">@category.Count</span>
+                                <small class="text-muted">(@category.Percentage.ToString("F1")%)</small>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted text-center">No categories found</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Issues</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentIssues.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var issue in Model.RecentIssues.Take(5))
+                        {
+                            <div class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">@issue.Title</div>
+                                    <small class="text-muted">@issue.Location • @issue.ReporterName</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-@(issue.Status switch
+                                    {
+                                        IssueStatus.Pending => "warning",
+                                        IssueStatus.InProgress => "info",
+                                        IssueStatus.Resolved => "success",
+                                        IssueStatus.Rejected => "danger",
+                                        _ => "secondary"
+                                    }) rounded-pill">
+                                        @issue.Status
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">@issue.CreatedAt.ToString("MMM dd")</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="text-center mt-3">
+                        <a asp-controller="Admin" asp-action="Issues" class="btn btn-sm btn-outline-primary">View All Issues</a>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center">No issues found</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Users</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentUsers.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in Model.RecentUsers)
+                                {
+                                    <tr>
+                                        <td>@user.Name</td>
+                                        <td>@user.Email</td>
+                                        <td>
+                                            <span class="badge bg-@(user.Role switch
+                                            {
+                                                UserRole.Admin => "danger",
+                                                UserRole.Official => "warning",
+                                                UserRole.Citizen => "info",
+                                                _ => "secondary"
+                                            })">
+                                                @user.Role
+                                            </span>
+                                        </td>
+                                        <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center">No users found</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
