@@ -1,5 +1,7 @@
 @{
     ViewData["Title"] = "Citizen Engagement Portal";
+    ViewData["UseFullWidth"] = true;
+    ViewData["MainPaddingClass"] = "py-0";
 }
 
 <section class="hero-modern">
@@ -13,10 +15,10 @@
                     Capture, triage, and resolve community issues with a beautifully modern dashboard that keeps citizens, officials, and administrators aligned at every step.
                 </p>
                 <div class="d-flex flex-wrap gap-3">
-                    <a href="@Url.Action("Register", "Account")" class="btn btn-light btn-lg px-4">
+                    <a href="@Url.Action("Register", "Account")" class="btn btn-primary btn-lg px-4">
                         <i class="fas fa-rocket me-2"></i>Launch your portal
                     </a>
-                    <a href="@Url.Action("Login", "Account")" class="btn btn-outline-light btn-lg px-4">
+                    <a href="@Url.Action("Login", "Account")" class="btn btn-soft-light btn-lg px-4 text-white">
                         Explore the experience
                     </a>
                 </div>

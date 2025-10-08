@@ -3,191 +3,182 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Admin Dashboard</h2>
+<div class="page-header">
     <div>
-        <span class="badge bg-danger me-2">Administrator</span>
-        <a asp-controller="Admin" asp-action="Analytics" class="btn btn-outline-primary">
+        <h1 class="page-title">Admin dashboard</h1>
+        <p class="page-subtitle">Monitor the health of the platform, oversee citywide collaboration, and take quick action on what matters most.</p>
+    </div>
+    <div class="page-actions">
+        <span class="badge-soft status-rejected text-uppercase">Administrator</span>
+        <a asp-controller="Admin" asp-action="Analytics" class="btn btn-primary btn-lg px-4">
             <i class="fas fa-chart-bar me-2"></i>Analytics
         </a>
     </div>
 </div>
 
-<div class="row mb-4">
-    <div class="col-md-2">
-        <div class="card text-white bg-primary">
-            <div class="card-body text-center">
-                <h3>@Model.TotalIssues</h3>
-                <h6 class="card-title">Total Issues</h6>
-            </div>
-        </div>
+<div class="metric-grid">
+    <div class="metric-tile gradient-blue">
+        <div class="label">Total issues</div>
+        <div class="value">@Model.TotalIssues</div>
+        <div class="icon"><i class="fas fa-layer-group"></i></div>
     </div>
-    <div class="col-md-2">
-        <div class="card text-white bg-warning">
-            <div class="card-body text-center">
-                <h3>@Model.PendingIssues</h3>
-                <h6 class="card-title">Pending</h6>
-            </div>
-        </div>
+    <div class="metric-tile gradient-amber">
+        <div class="label">Pending</div>
+        <div class="value">@Model.PendingIssues</div>
+        <div class="icon"><i class="fas fa-clock"></i></div>
     </div>
-    <div class="col-md-2">
-        <div class="card text-white bg-info">
-            <div class="card-body text-center">
-                <h3>@Model.InProgressIssues</h3>
-                <h6 class="card-title">In Progress</h6>
-            </div>
-        </div>
+    <div class="metric-tile gradient-cyan">
+        <div class="label">In progress</div>
+        <div class="value">@Model.InProgressIssues</div>
+        <div class="icon"><i class="fas fa-spinner"></i></div>
     </div>
-    <div class="col-md-2">
-        <div class="card text-white bg-success">
-            <div class="card-body text-center">
-                <h3>@Model.ResolvedIssues</h3>
-                <h6 class="card-title">Resolved</h6>
-            </div>
-        </div>
+    <div class="metric-tile gradient-emerald">
+        <div class="label">Resolved</div>
+        <div class="value">@Model.ResolvedIssues</div>
+        <div class="icon"><i class="fas fa-check"></i></div>
     </div>
-    <div class="col-md-2">
-        <div class="card text-white bg-secondary">
-            <div class="card-body text-center">
-                <h3>@Model.TotalUsers</h3>
-                <h6 class="card-title">Total Users</h6>
-            </div>
-        </div>
+    <div class="metric-tile gradient-slate">
+        <div class="label">Total users</div>
+        <div class="value">@Model.TotalUsers</div>
+        <div class="icon"><i class="fas fa-users"></i></div>
     </div>
-    <div class="col-md-2">
-        <div class="card text-white bg-dark">
-            <div class="card-body text-center">
-                <h3>@Model.TotalCitizens</h3>
-                <h6 class="card-title">Citizens</h6>
-            </div>
-        </div>
+    <div class="metric-tile gradient-rose">
+        <div class="label">Citizens</div>
+        <div class="value">@Model.TotalCitizens</div>
+        <div class="icon"><i class="fas fa-people-group"></i></div>
     </div>
 </div>
 
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Issues by Category</h5>
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100">
+            <div class="section-heading">
+                <div>
+                    <div class="title">Issues by category</div>
+                    <div class="subtitle">Top drivers of community feedback</div>
+                </div>
             </div>
-            <div class="card-body">
-                @if (Model.CategoryStats.Any())
-                {
-                    foreach (var category in Model.CategoryStats)
+            @if (Model.CategoryStats.Any())
+            {
+                <div class="list-modern">
+                    @foreach (var category in Model.CategoryStats)
                     {
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="d-flex align-items-center">
-                                <div class="rounded-circle me-2" style="width: 12px; height: 12px; background-color: @category.CategoryColor;"></div>
-                                <span>@category.CategoryName</span>
+                        <div class="list-modern-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle" style="width: 14px; height: 14px; background-color: @category.CategoryColor;"></div>
+                                <span class="text-white">@category.CategoryName</span>
                             </div>
-                            <div>
-                                <span class="badge bg-secondary">@category.Count</span>
-                                <small class="text-muted">(@category.Percentage.ToString("F1")%)</small>
+                            <div class="text-end">
+                                <span class="badge-soft">@category.Count</span>
+                                <div class="text-white-50 small">@category.Percentage.ToString("F1")%</div>
                             </div>
                         </div>
                     }
-                }
-                else
-                {
-                    <p class="text-muted text-center">No categories found</p>
-                }
-            </div>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state text-center py-4">
+                    <p class="text-white-50 mb-0">No categories found</p>
+                </div>
+            }
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Recent Issues</h5>
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100">
+            <div class="section-heading">
+                <div>
+                    <div class="title">Recent issues</div>
+                    <div class="subtitle">Newest reports entering the queue</div>
+                </div>
+                <a asp-controller="Admin" asp-action="Issues" class="btn btn-soft-light btn-sm px-3">View all</a>
             </div>
-            <div class="card-body">
-                @if (Model.RecentIssues.Any())
-                {
-                    <div class="list-group list-group-flush">
-                        @foreach (var issue in Model.RecentIssues.Take(5))
-                        {
-                            <div class="list-group-item d-flex justify-content-between align-items-start">
-                                <div class="ms-2 me-auto">
-                                    <div class="fw-bold">@issue.Title</div>
-                                    <small class="text-muted">@issue.Location • @issue.ReporterName</small>
+            @if (Model.RecentIssues.Any())
+            {
+                <div class="list-modern">
+                    @foreach (var issue in Model.RecentIssues.Take(5))
+                    {
+                        <div class="list-modern-item">
+                            <div class="d-flex justify-content-between align-items-start gap-3">
+                                <div>
+                                    <div class="text-white fw-semibold">@issue.Title</div>
+                                    <small class="text-white-50">@issue.Location • @issue.ReporterName</small>
                                 </div>
                                 <div class="text-end">
-                                    <span class="badge bg-@(issue.Status switch
+                                    <span class="chip chip-status @(issue.Status switch
                                     {
-                                        IssueStatus.Pending => "warning",
-                                        IssueStatus.InProgress => "info",
-                                        IssueStatus.Resolved => "success",
-                                        IssueStatus.Rejected => "danger",
-                                        _ => "secondary"
-                                    }) rounded-pill">
-                                        @issue.Status
+                                        IssueStatus.Pending => "pending",
+                                        IssueStatus.InProgress => "in-progress",
+                                        IssueStatus.Resolved => "resolved",
+                                        IssueStatus.Rejected => "rejected",
+                                        _ => string.Empty
+                                    })">
+                                        <i class="fas fa-signal"></i>@issue.Status
                                     </span>
-                                    <br>
-                                    <small class="text-muted">@issue.CreatedAt.ToString("MMM dd")</small>
+                                    <div class="text-white-50 small mt-2">@issue.CreatedAt.ToString("MMM dd")</div>
                                 </div>
                             </div>
-                        }
-                    </div>
-                    <div class="text-center mt-3">
-                        <a asp-controller="Admin" asp-action="Issues" class="btn btn-sm btn-outline-primary">View All Issues</a>
-                    </div>
-                }
-                else
-                {
-                    <p class="text-muted text-center">No issues found</p>
-                }
-            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state text-center py-4">
+                    <p class="text-white-50 mb-0">No issues found</p>
+                </div>
+            }
         </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Recent Users</h5>
-            </div>
-            <div class="card-body">
-                @if (Model.RecentUsers.Any())
-                {
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Joined</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var user in Model.RecentUsers)
-                                {
-                                    <tr>
-                                        <td>@user.Name</td>
-                                        <td>@user.Email</td>
-                                        <td>
-                                            <span class="badge bg-@(user.Role switch
-                                            {
-                                                UserRole.Admin => "danger",
-                                                UserRole.Official => "warning",
-                                                UserRole.Citizen => "info",
-                                                _ => "secondary"
-                                            })">
-                                                @user.Role
-                                            </span>
-                                        </td>
-                                        <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-                else
-                {
-                    <p class="text-muted text-center">No users found</p>
-                }
-            </div>
+<div class="glass-card p-4 mt-4">
+    <div class="section-heading">
+        <div>
+            <div class="title">Recent users</div>
+            <div class="subtitle">Latest residents and officials joining the platform</div>
         </div>
     </div>
+    @if (Model.RecentUsers.Any())
+    {
+        <div class="table-responsive table-modern">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.RecentUsers)
+                    {
+                        <tr>
+                            <td class="text-white">@user.Name</td>
+                            <td class="text-white-50">@user.Email</td>
+                            <td>
+                                <span class="chip chip-status @(user.Role switch
+                                {
+                                    UserRole.Admin => "rejected",
+                                    UserRole.Official => "pending",
+                                    UserRole.Citizen => "in-progress",
+                                    _ => string.Empty
+                                })">
+                                    <i class="fas fa-user-tag"></i>@user.Role
+                                </span>
+                            </td>
+                            <td class="text-white-50">@user.CreatedAt.ToString("MMM dd, yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state text-center py-4">
+            <p class="text-white-50 mb-0">No users found</p>
+        </div>
+    }
 </div>
