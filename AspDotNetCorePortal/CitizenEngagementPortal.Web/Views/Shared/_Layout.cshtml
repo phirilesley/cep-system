@@ -9,7 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="~/css/site.css" rel="stylesheet" />
 </head>
+
 <body class="bg-app text-body">
+    @{
+        var useFullWidth = ViewData["UseFullWidth"] as bool? ?? false;
+        var mainPaddingClass = ViewData["MainPaddingClass"] as string ?? "py-5";
+    }
     <div class="background-gradient"></div>
     <div class="background-pattern"></div>
     <header class="position-relative">
@@ -56,10 +61,17 @@
         </nav>
     </header>
     <div class="main-wrapper position-relative">
-        <main role="main" class="py-5">
-            <div class="container-xl">
+        <main role="main" class="@mainPaddingClass">
+            @if (useFullWidth)
+            {
                 @RenderBody()
-            </div>
+            }
+            else
+            {
+                <div class="container-xl">
+                    @RenderBody()
+                </div>
+            }
         </main>
     </div>
     <footer class="footer-modern text-white py-4">
